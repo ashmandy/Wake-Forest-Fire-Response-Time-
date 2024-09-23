@@ -1,0 +1,6 @@
+---
+title: "Plan372-hw2"
+author: "Mandy Langlois"
+format: html
+editor: visual
+---
