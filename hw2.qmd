@@ -1,7 +1,7 @@
 ---
 title: "Plan372-hw2"
 author: "Mandy Langlois"
-format: hmtl
+format: html
 editor: visual
 ---
 
@@ -139,50 +139,40 @@ dispatch_date_time_all = data |>
     
 ```
 
-# Calculating response time by station for catual fires.
+# Calculating response time by station for actual fires.
 # Determine which station have the highest and lowest average response time for actual fires.
 
 ```{r}
-dispatch_date_time_all = data |>
+
+dispatch_date_time_fires = data |>
+  filter(incident_type >= 100, incident_type < 200) |>
   mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) |>
-  filter(!is.na(dispatch_date_time),!is.na(arrive_date_time)) |>
-  mutate(response_time = arrive_date_time - dispatch_date_time) 
-
-average_response_time_all = dispatch_date_time_all |>
-  summarize(average_response_time_all = mean(response_time, na.rm=T))
-
-average_response_time_all
-  
-
-dispatch_date_time = data |>
-  filter(incident_type >=100, incident_type < 200) |>
-  mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) |>
-  filter(!is.na(dispatch_date_time),!is.na(arrive_date_time)) |>
+  filter(!is.na(dispatch_date_time), !is.na(arrive_date_time)) |>
   mutate(response_time = arrive_date_time - dispatch_date_time) 
   
-  average_response_time_by_station = dispatch_date_time_fires |>
+average_response_time_by_station_fires = dispatch_date_time_fires |>
     group_by(station) |>
     summarize(average_response_time = mean(response_time, na.rm=T))
   
-  highest_response_time_station = average_response_time_by_station |>
+highest_response_time_station_fires = average_response_time_by_station_fires |>
   filter(average_response_time == max(average_response_time, na.rm=T))
   
-lowest_response_time_station = average_response_time_by_station |>
+lowest_response_time_station_fires = average_response_time_by_station_fires |>
   filter(average_response_time == min(average_response_time, na.rm=T))
 
-average_response_time_by_station
-highest_response_time_station
-lowest_response_time_station
+average_response_time_by_station_fires
+highest_response_time_station_fires
+lowest_response_time_station_fires
 
 ```
 
 
 # Determine if wake forest county fire response times have been going up or down for actual fires.
-# determine the reson behind the changes.
+# determine the reason behind the changes.
 
 ```{r}
 dispatch_date_time = data |>
-  filter(incident_type >=100, incident_type < 200) |>
+  filter(incident_type >= 100, incident_type < 200) |>
   mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) |>
   filter(!is.na(dispatch_date_time),!is.na(arrive_date_time)) |>
   mutate(response_time = arrive_date_time - dispatch_date_time) 
