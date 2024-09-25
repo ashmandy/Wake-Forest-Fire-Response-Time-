@@ -1,6 +1,242 @@
 ---
 title: "Plan372-hw2"
 author: "Mandy Langlois"
-format: html
+format: hmtl
 editor: visual
 ---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+```
+
+# Load the data from the CSV.
+```{r}
+data = read_csv(here::here("Fire_incidents.csv"))
+
+```
+
+```{r}
+head(data)
+```
+# Make sure the dates and times are in the right format before any calculations.
+# Calculate the response times.
+```{r}
+dispatch_date_time = data |>
+  mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) 
+  
+  
+average_response_time = dispatch_date_time |>
+  mutate(response_time = arrive_date_time - dispatch_date_time) |>
+  summarize(response_time = mean(response_time, na.rm=T)) 
+ 
+average_response_time
+
+        
+```
+
+
+## Find the average response time by station.
+```{r}
+response_by_station = dispatch_date_time |>
+  mutate(response_time = arrive_date_time - dispatch_date_time) |>
+  group_by(station) |>
+  summarize(response_time = mean(response_time, na.rm=T)) 
+
+highest_response_time = response_by_station |>
+  filter(response_time == max(response_time, na.rm=T))
+  
+lowest_response_time = response_by_station |>
+  filter(response_time == min(response_time, na.rm=T))
+
+response_by_station 
+highest_response_time
+lowest_response_time
+
+
+
+
+```
+
+# finding the station with the highest and lowest average response over time.
+```{r}
+response_over_time = data |>
+  mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time))
+
+response_over_time = response_over_time |>
+  mutate(response_time = arrive_date_time - dispatch_date_time)
+
+response_over_time = response_over_time |>
+  mutate(year = year(dispatch_date_time))
+
+response_by_year = response_over_time |>
+  group_by(year) |>
+  summarize(response_time = mean(response_time, na.rm=T ))
+
+response_by_year
+
+ggplot(response_by_year, aes(x=year, y=response_time)) +
+  geom_line() 
+
+```
+
+# Calculating the times of day fire calls are most likely to occur.
+```{r}
+fire_calls_by_time = data |>
+  mutate(dispatch_date_time = ymd_hms(dispatch_date_time))
+
+fire_calls_by_time = fire_calls_by_time |>
+  mutate(hour = hour(dispatch_date_time))
+
+calls_by_hour = fire_calls_by_time |>
+group_by(hour) |>
+  summarize(call_count = length(dispatch_date_time)) 
+
+calls_by_hour
+
+ggplot(calls_by_hour, aes(x=hour, y=call_count)) +
+  geom_col()
+```
+
+# Calculating how many calls are recorded in this dataset.
+# figure out how many of them are actual fires.
+```{r}
+fire_calls = data |>
+  filter(incident_type >= 100, incident_type < 200)
+
+total_fire_calls = length(data$incident_type)
+
+actual_fires = sum(!is.na(fire_calls$incident_type))
+
+total_fire_calls
+actual_fires
+```
+
+# Determine the average response time to actual fires.
+# Determine if the response time is faster than the average response time for all incidents.
+
+```{r}
+dispatch_date_time_fires = data |>
+   filter(incident_type >= 100, incident_type < 200) |>
+   mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) 
+  
+  
+average_response_time_fires = dispatch_date_time_fires |>
+  mutate(response_time = arrive_date_time - dispatch_date_time) |>
+  summarize(average_response_time_fires = mean(response_time, na.rm=T)) 
+
+dispatch_date_time_all = data |>
+   mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) |>
+  filter(!is.na(dispatch_date_time), !is.na(arrive_date_time)) 
+  
+  average_response_time_all = dispatch_date_time_all |>
+    mutate(response_time = arrive_date_time - dispatch_date_time) |>
+    summarize(average_response_time_all = mean(response_time, na.rm=T))
+  
+  average_response_time_fires
+  average_response_time_all
+    
+```
+
+# Calculating response time by station for catual fires.
+# Determine which station have the highest and lowest average response time for actual fires.
+
+```{r}
+dispatch_date_time_all = data |>
+  mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) |>
+  filter(!is.na(dispatch_date_time),!is.na(arrive_date_time)) |>
+  mutate(response_time = arrive_date_time - dispatch_date_time) 
+
+average_response_time_all = dispatch_date_time_all |>
+  summarize(average_response_time_all = mean(response_time, na.rm=T))
+
+average_response_time_all
+  
+
+dispatch_date_time = data |>
+  filter(incident_type >=100, incident_type < 200) |>
+  mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) |>
+  filter(!is.na(dispatch_date_time),!is.na(arrive_date_time)) |>
+  mutate(response_time = arrive_date_time - dispatch_date_time) 
+  
+  average_response_time_by_station = dispatch_date_time_fires |>
+    group_by(station) |>
+    summarize(average_response_time = mean(response_time, na.rm=T))
+  
+  highest_response_time_station = average_response_time_by_station |>
+  filter(average_response_time == max(average_response_time, na.rm=T))
+  
+lowest_response_time_station = average_response_time_by_station |>
+  filter(average_response_time == min(average_response_time, na.rm=T))
+
+average_response_time_by_station
+highest_response_time_station
+lowest_response_time_station
+
+```
+
+
+# Determine if wake forest county fire response times have been going up or down for actual fires.
+# determine the reson behind the changes.
+
+```{r}
+dispatch_date_time = data |>
+  filter(incident_type >=100, incident_type < 200) |>
+  mutate(dispatch_date_time = ymd_hms(dispatch_date_time), arrive_date_time = ymd_hms(arrive_date_time)) |>
+  filter(!is.na(dispatch_date_time),!is.na(arrive_date_time)) |>
+  mutate(response_time = arrive_date_time - dispatch_date_time) 
+  
+dispatch_date_time_fires = dispatch_date_time_fires |>
+  mutate(year = year(dispatch_date_time))
+
+average_response_time_by_year = dispatch_date_time_fires |>
+  group_by(year) |>
+  summarize(average_response_time = mean(response_time, na.rm=T))
+  
+average_response_time_by_year
+
+ggplot(average_response_time_by_year, aes(x=year, y=average_response_time)) +
+  geom_line() 
+```
+
+# Determine what times of day are fire calls most likely occur.
+```{r}
+fire_calls = data |>
+  filter(incident_type >= 100, incident_type < 200) |>
+  mutate(dispatch_date_time = ymd_hms(dispatch_date_time))
+
+fire_calls = fire_calls |>
+  mutate(hour = hour(dispatch_date_time))
+
+calls_by_hour = fire_calls |>
+  group_by(hour) |>
+  summarize(call_count = length(dispatch_date_time))
+
+calls_by_hour
+
+ggplot(calls_by_hour, aes(x=hour, y=call_count)) +
+  geom_col()
+  
+```
+
+
+### Final write up ###
+
+Q1. According to the table above, on average it takes 318.7497 seconds for Wake County Fire to respond to incidents.
+
+Q2. The response times do vary across all stations, station 29 has the highest response time with a response time of 495.764 secs. Station 13 has the lowest response time with	223 secs.
+
+Q3. Wake County Fire's response time has been been going down over time, down to less than 300 secs after 2020. this may be due to an improvement in technology, an increase in personnel could also be a factor in reducing the response time.
+
+Q4. Fire calls are most likely to occur from 21:00-23:00 hours.
+
+Q5. 229047 calls are to Wake County Fire are recorded in this dataset, and 17231 of those calls are actual fires.
+
+Q6. The average response time for actual fires is 310.9837 secs, the average response time for all incidents is 318.7497. Therefore, the response time to actual fires averages was faster.
+
+Q7.2  The average response time across all station varies. Station 23 had the highest average response time with 586.3713 secs, station 3 had the lowest average response time with 232.7666 secs.
+
+Q7.3  Over time the average response time for wake county fire has been going down, this decline may be due to improved infrastructures that lead to better route options and a reduction in traffic.
+
+Q7.4 Fire calls are most likely to occur for actual fires from 19:00-23:00, these fires could be happening because of faulty or unattended equipment, technology, everyone charges their phones/tablets before they go to sleep not caring about the dangers that may come with such practices.
