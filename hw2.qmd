@@ -230,3 +230,6 @@ Q7.2  The average response time across all station varies. Station 23 had the hi
 Q7.3  Over time the average response time for wake county fire has been going down, this decline may be due to improved infrastructures that lead to better route options and a reduction in traffic.
 
 Q7.4 Fire calls are most likely to occur for actual fires from 19:00-23:00, these fires could be happening because of faulty or unattended equipment, technology, everyone charges their phones/tablets before they go to sleep not caring about the dangers that may come with such practices.
+
+## Repository link:
+https://github.com/ashmandy/plan372-hw2.git
