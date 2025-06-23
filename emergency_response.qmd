@@ -1,7 +1,7 @@
 ---
 title: "Response Time"
 author: "Mandy Langlois"
-format: html
+format: pdf
 editor: visual
 ---
 
@@ -176,9 +176,9 @@ lowest_response_time_station_fires
 
 ```
 
-# Determine if wake forest county fire response times have been going up or down for actual fires.
+## Determine if wake forest county fire response times have been going up or down for actual fires.
 
-# determine the reason behind the changes.
+## determine the reason behind the changes.
 
 ```{r}
 dispatch_date_time = data |>
@@ -200,7 +200,7 @@ ggplot(average_response_time_by_year, aes(x=year, y=average_response_time)) +
   geom_line() 
 ```
 
-# Determine what times of day are fire calls most likely occur.
+## Determine what times of day are fire calls most likely occur.
 
 ```{r}
 fire_calls = data |>
